@@ -25,14 +25,20 @@ qbt_changeport(){
     return $?
 }
 
-public_ip=''
-qbt_sid=''
-configured_port=''
+public_ip=$(getpublicip)
+qbt_sid=$(qbt_login)
+configured_port=$(findconfiguredport ${qbt_sid})
 active_port=''
 
-check() {
+get_portmap() {
+    res=0
     public_ip=$(getpublicip)
-    qbt_sid=$(qbt_login)
+
+    if echo $(curl -s --header "Referer: http://${QBITTORRENT_SERVER}:${QBITTORRENT_PORT}" --cookie "${qbt_sid}" http://${QBITTORRENT_SERVER}:${QBITTORRENT_PORT}/api/v2/app/version) | grep -qi forbidden; then
+        echo "$(timestamp) | qBittorrent Cookie invalid, getting new SessionID"
+        qbt_sid=$(qbt_login)
+    fi
+
     configured_port=$(findconfiguredport ${qbt_sid})
     active_port=$(findactiveport)
 
@@ -46,15 +52,23 @@ check() {
             echo "$(timestamp) | Port Changed to: $(findconfiguredport ${qbt_sid})"
         else
             echo "$(timestamp) | Port Change failed."
+            res=1
         fi
     else
         echo "$(timestamp) | Port OK (Act: ${active_port} Cfg: ${configured_port})"
     fi
+
+    return $res
 }
 
 while true;
 do
-    check
+    if get_portmap; then
+        echo "$(timestamp) | NAT-PMP/UPnP Ok!"
+    else
+        echo "$(timestamp) | NAT-PMP/UPnP Failed"
+    fi
+    echo "$(timestamp) | Sleeping for $(echo ${CHECK_INTERVAL}/60 | bc) minutes"
     sleep ${CHECK_INTERVAL}
 done
 
