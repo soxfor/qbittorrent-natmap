@@ -1,7 +1,7 @@
 LABEL org.opencontainers.image.source="https://github.com/soxfor/qbittorrent-natmap"
-LABEL org.opencontainers.image.description="Map port via NAT-PMP and update qBittorrent configuration"
-LABEL org.opencontainers.image.version="1.0.0"
 LABEL org.opencontainers.image.base.name="ubuntu:jammy"
+LABEL description="Map port via NAT-PMP and update qBittorrent configuration"
+LABEL version="1.0.0"
 
 FROM ubuntu:jammy
 
