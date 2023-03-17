@@ -10,8 +10,9 @@
 name: Create and publish a Docker image
 
 on:
-  push:
-    branches: ['main']
+  workflow_dispatch:
+  release:
+    types: [created]
 
 env:
   REGISTRY: ghcr.io
