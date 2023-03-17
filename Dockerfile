@@ -1,7 +1,8 @@
 FROM ubuntu:jammy
 
-LABEL version="0.1"
-LABEL description="Map NAT-PMP/UPnP port and update qBittorrent configuration"
+LABEL org.opencontainers.image.source=https://github.com/soxfor/qbittorrent-natmap
+LABEL org.opencontainers.image.description="Map NAT-PMP/UPnP port and update qBittorrent configuration"
+LABEL org.opencontainers.image.version=1.0.0
 
 ARG DEBIAN_FRONTEND=noninteractive
 
