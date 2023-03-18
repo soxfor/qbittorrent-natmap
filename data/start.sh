@@ -48,6 +48,11 @@ get_portmap() {
 
     if [ ${configured_port} != ${active_port} ]; then
         if qbt_changeport ${qbt_sid} ${active_port}; then
+            docker exec ${VPN_CT_NAME} /sbin/iptables -A INPUT -i ${VPN_IF_NAME} -p tcp --dport ${active_port} -j ACCEPT
+            docker exec ${VPN_CT_NAME} /sbin/iptables -D INPUT -i ${VPN_IF_NAME} -p tcp --dport ${configured_port} -j ACCEPT
+            if docker exec ${VPN_CT_NAME} /sbin/iptables -L INPUT -n | grep -qP "^ACCEPT.*${active_port}.*"; then
+                echo "$(timestamp) | IPTables rule added for port ${active_port} on ${VPN_CT_NAME} container"
+            fi
             sleep 3
             echo "$(timestamp) | Port Changed to: $(findconfiguredport ${qbt_sid})"
         else
@@ -60,6 +65,22 @@ get_portmap() {
 
     return $res
 }
+
+while read var; do
+    [ -z "${!var}" ] && { echo "$(timestamp) | ${var} is empty or not set."; exit 1; }
+done << EOF
+QBITTORRENT_SERVER
+QBITTORRENT_PORT
+QBITTORRENT_USER
+QBITTORRENT_PASS
+VPN_GATEWAY
+VPN_CT_NAME
+VPN_IF_NAME
+CHECK_INTERVAL
+NAT_LEASE_LIFETIME
+EOF
+
+[ ! -S /var/run/docker.sock ] && { echo "$(timestamp) | Docker socket doesn't exist or is inaccessible"; exit 2; }
 
 while true;
 do
