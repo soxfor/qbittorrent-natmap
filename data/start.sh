@@ -34,6 +34,11 @@ qbt_checksid(){
     fi
 }
 
+qbt_isreachable(){
+    (sleep 3; echo "^C") | ncat -4 --wait 5 ${QBITTORRENT_SERVER} ${QBITTORRENT_PORT} 2>/dev/null &>/dev/null
+    return $?
+}
+
 get_portmap() {
     res=0
     public_ip=$(getpublicip)
@@ -97,8 +102,13 @@ return 0
 
 load_vals(){
     public_ip=$(getpublicip)
-    qbt_sid=$(qbt_login)
-    configured_port=$(findconfiguredport ${qbt_sid})
+    if qbt_isreachable; then
+        qbt_sid=$(qbt_login)
+        configured_port=$(findconfiguredport ${qbt_sid})
+    else
+        echo "$(timestamp) | Unable to reach qBittorrent at ${QBITTORRENT_SERVER}:${QBITTORRENT_PORT}"
+        exit 6
+    fi
     active_port=''
 }
 

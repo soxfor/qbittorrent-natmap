@@ -20,7 +20,7 @@ LABEL version="1.0.4"
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt update
-RUN apt install --no-install-suggests --no-install-recommends -y natpmpc curl bc
+RUN apt install --no-install-suggests --no-install-recommends -y natpmpc curl bc ncat
 RUN rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 RUN apt clean
 
