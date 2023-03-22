@@ -29,3 +29,5 @@ services:
       # qBittorrent Container Name
       - qbittorrent
     network_mode: "container:gluetun" # Specify the VPN container name here
+    # or
+    # network_mode: "service:gluetun" # if defined on the same docker-compose file
