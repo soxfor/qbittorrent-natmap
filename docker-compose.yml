@@ -8,12 +8,26 @@ services:
     environment:
       - TZ=Etc/UTC
       - QBITTORRENT_SERVER=ip.a.dd.r
-      # - QBITTORRENT_PORT=   # Defaults to 8080
-      # - QBITTORRENT_USER=   # Defaults to admin
-      # - QBITTORRENT_PASS=   # Defaults to adminadmin
-      # - VPN_CT_NAME=        # Defaults to gluetun
+      # - QBITTORRENT_PORT=   
+      # Defaults to 8080
+      # - QBITTORRENT_USER=   
+      # Defaults to admin
+      # - QBITTORRENT_PASS=   
+      # Defaults to adminadmin
+      # - VPN_CT_NAME=        
+      # Defaults to gluetun
       - VPN_GATEWAY=ip.a.dd.r
-      # - VPN_IF_NAME=        # Defaults to tun0
-      # - CHECK_INTERVAL=     # Defaults to 300sec
-      # - NAT_LEASE_LIFETIME= # Defaults to 300sec
+      # - VPN_IF_NAME=        
+      # Defaults to tun0
+      # - CHECK_INTERVAL=     
+      # Defaults to 300sec
+      # - NAT_LEASE_LIFETIME= 
+      # Defaults to 300sec
+    depends_on:
+      # VPN Container Name
+      - gluetun
+      # qBittorrent Container Name
+      - qbittorrent
     network_mode: "container:gluetun" # Specify the VPN container name here
+    # or
+    # network_mode: "service:gluetun" # if defined on the same docker-compose file
