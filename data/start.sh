@@ -35,8 +35,24 @@ qbt_checksid(){
 }
 
 qbt_isreachable(){
-    (sleep 3; echo "^C") | ncat -4 --wait 5 ${QBITTORRENT_SERVER} ${QBITTORRENT_PORT} 2>/dev/null &>/dev/null
-    return $?
+    nc -4 -vw 5 ${QBITTORRENT_SERVER} ${QBITTORRENT_PORT} 2>&1 &>/dev/null
+}
+
+fw_delrule(){
+    if (docker exec ${VPN_CT_NAME} /sbin/iptables -L INPUT -n | grep -qP "^ACCEPT.*${configured_port}.*"); then
+        docker exec ${VPN_CT_NAME} /sbin/iptables -D INPUT -i ${VPN_IF_NAME} -p tcp --dport ${configured_port} -j ACCEPT
+        docker exec ${VPN_CT_NAME} /sbin/iptables -D INPUT -i ${VPN_IF_NAME} -p udp --dport ${configured_port} -j ACCEPT
+    fi
+}
+
+fw_addrule(){
+    if ! (docker exec ${VPN_CT_NAME} /sbin/iptables -L INPUT -n | grep -qP "^ACCEPT.*${active_port}.*"); then
+        docker exec ${VPN_CT_NAME} /sbin/iptables -A INPUT -i ${VPN_IF_NAME} -p tcp --dport ${active_port} -j ACCEPT
+        docker exec ${VPN_CT_NAME} /sbin/iptables -A INPUT -i ${VPN_IF_NAME} -p udp --dport ${active_port} -j ACCEPT
+        return 0
+    else
+        return 1
+    fi
 }
 
 get_portmap() {
@@ -59,14 +75,8 @@ get_portmap() {
 
     if [ ${configured_port} != ${active_port} ]; then
         if qbt_changeport ${qbt_sid} ${active_port}; then
-            docker exec ${VPN_CT_NAME} /sbin/iptables -A INPUT -i ${VPN_IF_NAME} -p tcp --dport ${active_port} -j ACCEPT
-            docker exec ${VPN_CT_NAME} /sbin/iptables -A INPUT -i ${VPN_IF_NAME} -p udp --dport ${active_port} -j ACCEPT
-            if docker exec ${VPN_CT_NAME} /sbin/iptables -L INPUT -n | grep -qP "^ACCEPT.*${configured_port}.*"; then
-                docker exec ${VPN_CT_NAME} /sbin/iptables -D INPUT -i ${VPN_IF_NAME} -p tcp --dport ${configured_port} -j ACCEPT
-                docker exec ${VPN_CT_NAME} /sbin/iptables -D INPUT -i ${VPN_IF_NAME} -p udp --dport ${configured_port} -j ACCEPT
-            fi
-            if docker exec ${VPN_CT_NAME} /sbin/iptables -L INPUT -n | grep -qP "^ACCEPT.*${active_port}.*"; then
-                echo "$(timestamp) | IPTables rule added for port ${active_port} on ${VPN_CT_NAME} container"
+            if fw_delrule; then
+                echo "$(timestamp) | IPTables rule deleted for port ${configured_port} on ${VPN_CT_NAME} container"
             fi
             echo "$(timestamp) | Port Changed to: $(findconfiguredport ${qbt_sid})"
         else
@@ -75,6 +85,10 @@ get_portmap() {
         fi
     else
         echo "$(timestamp) | Port OK (Act: ${active_port} Cfg: ${configured_port})"
+    fi
+
+    if fw_addrule; then
+        echo "$(timestamp) | IPTables rule added for port ${active_port} on ${VPN_CT_NAME} container"
     fi
 
     return $res
