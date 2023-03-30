@@ -42,6 +42,7 @@ These actions are performed continuously (in a loop, every 5 minutes (default, c
 * QBITTORRENT_PORT (Defaults to **8080**)
 * QBITTORRENT_USER (Defaults to **admin**)
 * QBITTORRENT_PASS (Defaults to **adminadmin**)
+    * Password is sent as is to [qBittorrent][4] but no encoding is done. Hence password with some special/UTF-8 characters might not work.
 * VPN_GATEWAY (Defaults to empty, **needs to be set**)
     * The value for this variable will be the `VPN_IF_NAME` (default: tun0) gateway address, not the `VPN_ENDPOINT_IP` from the Gluetun/VPN Container when using Wireguard, [more info here](https://github.com/qdm12/gluetun/wiki/Custom-provider#wireguard-only).
     * For ProtonVPN using Wireguard this would be set to **10.2.0.1**
@@ -54,3 +55,4 @@ These actions are performed continuously (in a loop, every 5 minutes (default, c
 [1]: https://protonvpn.com/support/port-forwarding-manual-setup/
 [2]: https://pkgs.alpinelinux.org/contents?file=natpmpc&path=&name=&branch=edge
 [3]: https://gitlab.alpinelinux.org/alpine/awall/-/issues/2220
+[4]: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#login
