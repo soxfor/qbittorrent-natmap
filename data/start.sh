@@ -18,7 +18,7 @@ findactiveport() {
 }
 
 qbt_login() {
-    curl -s -i --header "Referer: http://${QBITTORRENT_SERVER}:${QBITTORRENT_PORT}" --data "username=${QBITTORRENT_USER}&password=${QBITTORRENT_PASS}" http://${QBITTORRENT_SERVER}:${QBITTORRENT_PORT}/api/v2/auth/login | grep -oP '(?!set-cookie:.)SID=.*(?=\;.HttpOnly\;.path=\/\;)'
+    curl -s -i --header "Referer: http://${QBITTORRENT_SERVER}:${QBITTORRENT_PORT}" --data "username=${QBITTORRENT_USER}&password=${QBITTORRENT_PASS}" http://${QBITTORRENT_SERVER}:${QBITTORRENT_PORT}/api/v2/auth/login | grep -oP '(?!set-cookie:.)SID=.*(?=\;.HttpOnly\;)'
 }
 
 qbt_changeport(){
@@ -62,6 +62,10 @@ get_portmap() {
     if ! qbt_checksid; then
         echo "$(timestamp) | qBittorrent Cookie invalid, getting new SessionID"
         qbt_sid=$(qbt_login)
+	if [ -z "${qbt_sid}" ]; then
+	    echo "$(timestamp) | Failed getting new SessionID from qBittorrent"
+	    return 1
+	fi
     else
         echo "$(timestamp) | qBittorrent SessionID Ok!"
     fi
