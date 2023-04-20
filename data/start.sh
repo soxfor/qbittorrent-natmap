@@ -72,7 +72,7 @@ get_portmap() {
         echo "$(timestamp) | qBittorrent Cookie invalid, getting new SessionID"
         if ! qbt_login; then
             echo "$(timestamp) | Failed getting new SessionID from qBittorrent"
-	        return 1
+	          return 1
         fi
     else
         echo "$(timestamp) | qBittorrent SessionID Ok!"
