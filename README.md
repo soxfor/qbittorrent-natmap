@@ -36,7 +36,7 @@ These actions are performed continuously (in a loop, every 5 minutes (default, c
 
 ## Configurable variables:
 
-* QBITTORRENT_SERVER (Defaults to empty, **needs to be set**)
+* QBITTORRENT_SERVER (Defaults to **localhost**)
     * If setting here an address not related to the `VPN_IF_NAME` (default: tun0) a few users have [reported](https://old.reddit.com/r/ProtonVPN/comments/11ubgvi/port_forward_with_qbittorrent_and_protonvpn_on/jcxirts/) needing to set `FIREWALL_OUTBOUND_SUBNETS` for the Gluetun/VPN container
     * For ProtonVPN using Wireguard and qBittorrent container using `VPN_CT_NAME` as network_mode this would be set to **10.2.0.2**
 * QBITTORRENT_PORT (Defaults to **8080**)

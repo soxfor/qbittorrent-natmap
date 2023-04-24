@@ -45,7 +45,7 @@ RUN sed -i "/${LANG}/s/^# //g" /etc/locale.gen && \
     ln -fs "/usr/share/zoneinfo/${TZ}" /etc/localtime && \
     dpkg-reconfigure tzdata
 
-ENV QBITTORRENT_SERVER=
+ENV QBITTORRENT_SERVER=localhost
 ENV QBITTORRENT_PORT=8080
 ENV QBITTORRENT_USER=admin
 ENV QBITTORRENT_PASS=adminadmin
