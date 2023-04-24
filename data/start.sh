@@ -4,6 +4,41 @@ timestamp() {
     date '+%Y-%m-%d %H:%M:%S'
 }
 
+get_vpn_if_gw() {
+    local vpn_if_hex_addr=''
+    local vpn_if_dec_addr=''
+    local vpn_if_addr=''
+    local try_ip=''
+    local vpn_if_gw=''
+
+    vpn_if_hex_addr=$(grep "${VPN_IF_NAME}" /proc/net/route | awk '$2 == "00000000" { print $3 }')
+    
+    if [ -n "${vpn_if_hex_addr}" ]; then
+        #shellcheck disable=SC2046
+        vpn_if_dec_addr=$(printf "%d." $(echo "${vpn_if_hex_addr}" | sed 's/../0x& /g' | tr ' ' '\n' | tac) | sed 's/\.$/\n/')
+    fi
+
+    if [ -z "${vpn_if_dec_addr}" ]; then
+        vpn_if_addr=$(ip addr show dev "${VPN_IF_NAME}" | grep -oP '([0-9]{1,3}[\.]){3}[0-9]{1,3}')
+        for n in {1..254}; do
+            try_ip="$(echo "${vpn_if_addr}" | cut -d'.' -f1-3).${n}"
+            if [ "${try_ip}" != "${vpn_if_addr}" ]; then
+                if nc -4 -vw1 "${try_ip}" 1 &>/dev/null 2>&1; then
+                    vpn_if_gw=${try_ip}
+                    break
+                fi
+            fi
+        done
+        if [ -n "${vpn_if_gw}" ]; then
+            echo "${vpn_if_gw}"
+        else
+            return 1
+        fi
+    else 
+        echo "${vpn_if_dec_addr}"
+    fi
+}
+
 getpublicip() {
     # shellcheck disable=SC2086
     natpmpc -g ${VPN_GATEWAY} | grep -oP '(?<=Public.IP.address.:.).*'
@@ -107,7 +142,23 @@ get_portmap() {
     return $res
 }
 
+check_vpn_ct_health() {
+    while true;
+    do
+        if ! docker inspect "${VPN_CT_NAME}" --format='{{json .State.Health.Status}}' | grep -q '"healthy"'; then
+            echo "$(timestamp) | Waiting for ${VPN_CT_NAME} healthy state.."
+            sleep 3
+        else
+            echo "$(timestamp) | VPN container ${VPN_CT_NAME} in healthy state!"
+            break
+        fi
+    done
+}
+
 pre_reqs() {
+    if [ -z "${VPN_GATEWAY}" ]; then
+        VPN_GATEWAY=$(get_vpn_if_gw || echo '')
+    fi
 while read -r var; do
     [ -z "${!var}" ] && { echo "$(timestamp) | ${var} is empty or not set."; exit 1; }
 done << EOF
@@ -147,6 +198,9 @@ public_ip=
 configured_port=
 active_port=
 qbt_sid=
+
+# Wait for a healthy state on the VPN container
+check_vpn_ct_health
 
 if pre_reqs; then load_vals; fi
 
