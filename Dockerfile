@@ -19,7 +19,7 @@ FROM ubuntu:jammy
 LABEL org.opencontainers.image.source="https://github.com/soxfor/qbittorrent-natmap"
 LABEL org.opencontainers.image.base.name="ubuntu:jammy"
 LABEL description="Map port via NAT-PMP and update qBittorrent configuration"
-LABEL version="1.0.7"
+LABEL version="1.1.0"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -30,7 +30,8 @@ RUN apt-get install --no-install-suggests --no-install-recommends --yes --quiet 
     bc \
     netcat-openbsd \
     tzdata \
-    locales
+    locales \
+    iproute2
 RUN rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 RUN apt-get clean
 

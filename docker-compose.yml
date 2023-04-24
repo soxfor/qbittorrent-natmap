@@ -1,33 +1,96 @@
+---
 services:
-  app:
+  gluetun:
+    # https://github.com/qdm12/gluetun
+    image: ghcr.io/qdm12/gluetun:latest
+    container_name: gluetun
+    # line above must be uncommented to allow external containers to connect. See https://github.com/qdm12/gluetun/wiki/Connect-a-container-to-gluetun#external-container-to-gluetun
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - /<yourpath>:/gluetun
+      # If using ProtonVPN with OpenVPN, this path needs to be set to the downloaded .ovpn file
+      # - /<yourpath>/<ovpn_config>.udp.ovpn:/gluetun/custom.conf:ro
+    environment:
+      # See https://github.com/qdm12/gluetun/wiki
+      ## ProtonVPN Wireguard
+      - VPN_SERVICE_PROVIDER=custom
+      - VPN_TYPE=wireguard
+      - VPN_ENDPOINT_IP=
+      - VPN_ENDPOINT_PORT=
+      - WIREGUARD_PUBLIC_KEY=
+      - WIREGUARD_PRIVATE_KEY=
+      - WIREGUARD_ADDRESSES=
+      ## ProtonVPN OpenVPN
+      # - VPN_SERVICE_PROVIDER=custom
+      # - VPN_TYPE=openvpn
+      # - OPENVPN_CUSTOM_CONFIG=/gluetun/custom.conf
+      # See https://protonvpn.com/support/port-forwarding-manual-setup/
+      # - OPENVPN_USER=<username>+pmp
+      # - OPENVPN_PASSWORD=
+      # Timezone for accurate log times
+      - TZ=Etc/UTC
+      # Server list updater. See https://github.com/qdm12/gluetun/wiki/Updating-Servers#periodic-update
+      - UPDATER_PERIOD=
+      - UPDATER_VPN_SERVICE_PROVIDERS=
+      # If QBITTORRENT_SERVER address is not related to VPN_IF_NAME (default: tun0) you'll need to set the variable below
+      # - FIREWALL_OUTBOUND_SUBNETS=172.16.0.0/24
+    ports:
+      # - 8888:8888/tcp # HTTP proxy
+      # - 8388:8388/tcp # Shadowsocks
+      # - 8388:8388/udp # Shadowsocks
+      - 8080:8080/tcp # qBittorrent
+    # networks:
+    #   gluetun-network:
+    #     ipv4_address: 172.16.0.10
+
+  qbittorrent:
+    # https://docs.linuxserver.io/images/docker-qbittorrent
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    volumes:
+      - /<yourpath>/config:/config
+      - /<yourpath>/downloads:/downloads
+    environment:
+      - TZ=Etc/UTC
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+
+  qbittorrent-natmap:
+    # https://github.com/soxfor/qbittorrent-natmap
     image: ghcr.io/soxfor/qbittorrent-natmap:latest
     container_name: qbittorrent-natmap
     restart: unless-stopped
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - TZ=Etc/UTC
-      - QBITTORRENT_SERVER=ip.a.dd.r
-      # - QBITTORRENT_PORT=   
-      # Defaults to 8080
-      # - QBITTORRENT_USER=   
-      # Defaults to admin
-      # - QBITTORRENT_PASS=   
-      # Defaults to adminadmin
-      # - VPN_CT_NAME=        
-      # Defaults to gluetun
-      - VPN_GATEWAY=ip.a.dd.r
-      # - VPN_IF_NAME=        
-      # Defaults to tun0
-      # - CHECK_INTERVAL=     
-      # Defaults to 300sec
-      # - NAT_LEASE_LIFETIME= 
-      # Defaults to 300sec
+      - QBITTORRENT_SERVER=
+      # - QBITTORRENT_PORT=8080
+      # - QBITTORRENT_USER=admin
+      # - QBITTORRENT_PASS=adminadmin
+      # - VPN_GATEWAY=
+      # - VPN_CT_NAME=gluetun
+      # - VPN_IF_NAME=tun0
+      # - CHECK_INTERVAL=300
+      # - NAT_LEASE_LIFETIME=300
+    network_mode: "service:gluetun"
     depends_on:
-      # VPN Container Name
-      - gluetun
-      # qBittorrent Container Name
-      - qbittorrent
-    network_mode: "container:gluetun" # Specify the VPN container name here
-    # or
-    # network_mode: "service:gluetun" # if defined on the same docker-compose file
+      qbittorrent:
+        condition: service_started
+      gluetun:
+        condition: service_healthy
+
+#networks:
+#  gluetun-network:
+#    driver: bridge
+#    ipam:
+#      config:
+#        - subnet: 172.16.0.0/24
+#          gateway: 172.16.0.254
