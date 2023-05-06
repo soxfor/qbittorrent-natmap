@@ -71,7 +71,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - TZ=Etc/UTC
-      - QBITTORRENT_SERVER=
+      # - QBITTORRENT_SERVER=
       # - QBITTORRENT_PORT=8080
       # - QBITTORRENT_USER=admin
       # - QBITTORRENT_PASS=adminadmin
