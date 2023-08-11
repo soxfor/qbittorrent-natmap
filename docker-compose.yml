@@ -75,6 +75,7 @@ services:
       # - QBITTORRENT_PORT=8080
       # - QBITTORRENT_USER=admin
       # - QBITTORRENT_PASS=adminadmin
+      # - QBITTORRENT_SERVER_HTTP_OR_HTTPS=http
       # - VPN_GATEWAY=
       # - VPN_CT_NAME=gluetun
       # - VPN_IF_NAME=tun0
