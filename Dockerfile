@@ -54,6 +54,7 @@ ENV VPN_CT_NAME=gluetun
 ENV VPN_IF_NAME=tun0
 ENV CHECK_INTERVAL=300
 ENV NAT_LEASE_LIFETIME=300
+ENV IPTABLES_PATH=/sbin/iptables-legacy
 
 COPY --from=docker-cli /usr/bin/docker /usr/bin/docker
 COPY data/start.sh /start.sh
