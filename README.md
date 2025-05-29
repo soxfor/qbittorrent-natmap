@@ -42,6 +42,8 @@ These actions are performed continuously (in a loop, every 5 minutes (default, c
 * QBITTORRENT_PORT (Defaults to **8080**)
 * QBITTORRENT_USER (Defaults to **admin**)
 * QBITTORRENT_PASS (Defaults to **adminadmin**)
+* QBITTORRENT_SERVER_HTTP_OR_HTTPS (Defaults to **http**)
+   * Use either http or https depending on the qBittorrent WebUI setting.
 * VPN_GATEWAY (Defaults to **empty**)
     * If not set the script will try and find it
     * The value for this variable will be the `VPN_IF_NAME` (default: tun0) gateway address, not the `VPN_ENDPOINT_IP` from the Gluetun/VPN Container when using Wireguard, [more info here](https://github.com/qdm12/gluetun/wiki/Custom-provider#wireguard-only).
