@@ -81,6 +81,7 @@ services:
       # - VPN_IF_NAME=tun0
       # - CHECK_INTERVAL=300
       # - NAT_LEASE_LIFETIME=300
+      # - IPTABLES_PATH=/sbin/iptables-legacy
     network_mode: "service:gluetun"
     depends_on:
       qbittorrent:
