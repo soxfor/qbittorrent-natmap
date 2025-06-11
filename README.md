@@ -1,3 +1,16 @@
+# qBittorrent-NatMap (** Archived **)
+
+On latest versions of Gluetun this script/container is no longer needed to activate/reconfigure the forwarded port on qBittorrent. This action can be carried out via the option VPN_PORT_FORWARDING_UP_COMMAND. 
+
+An (as of now) working docker-compose.yaml can be consulted here: https://github.com/soxfor/qbittorrent-natmap/issues/28#issuecomment-2963233772
+
+More details are on the Gluetun documentation, on the link below.
+
+### VPN server port forwarding: Custom port forwarding up/down command
+https://github.com/qdm12/gluetun-wiki/blob/main/setup/advanced/vpn-port-forwarding.md#custom-port-forwarding-updown-command
+
+----
+
 # qBittorrent-NatMap 
 
 The objective of this container is to run a script that requests a port forward (via NAT-PMP) from the VPN provider and upon success changes the listening port of the qBittorrent client when running in Docker
